@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020, Renesas Electronics Corporation. All rights reserved.
+ * Copyright (c) 2015-2022, Renesas Electronics Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -10,8 +10,12 @@
 #include "devdrv.h"
 #include "devdrv.h"
 #include "bit.h"
+#include "rzg2l_def.h"
 #include "cpudrv.h"
 #include "scifdrv.h"
+
+#define	WDTCNT0	(RZG2L_WDT_BASE + 0x00)
+#define	WDTSET0	(RZG2L_WDT_BASE + 0x04)
 
 extern const char *const AllHelpMess[ALL_HELP_MESS_LINE];
 extern const com_menu MonCom[COMMAND_UNIT];
@@ -60,19 +64,38 @@ int32_t	GetStr_ByteCount(char *str,uint32_t getByteCount)
 	*str = 0;
 }
 
-
-
-void	dgScifSpeedUp(void)
-{
-	dgScifSpeedUp_921600();
-}
-
 /****************************************************************
 	MODULE		: dgScifSpeedUp				*
 	FUNCTION	: Scif speed UP	Change 921.6kbps	*
 	COMMAND		: SUP					*
 	INPUT PARAMETER	: SUP					*
 *****************************************************************/
-void	dgScifSpeedUp_921600(void)
+void	dgScifSpeedUp(void)
 {
+	PutStr("Scif speed UP",1);
+	PutStr("Please change to 921.6Kbps baud rate setting of the terminal.",1);
+	WaitPutCharSendEnd();
+
+	InitScif0_SCIFCLK(921600);
+}
+
+/****************************************************************
+	MODULE		: dgScifSpeedDown			*
+	FUNCTION	: Scif speed Down	Change 115.2kbps*
+	COMMAND		: SDP					*
+	INPUT PARAMETER	: SDP					*
+*****************************************************************/
+void	dgScifSpeedDown(void)
+{
+	PutStr("Scif speed DOWN",1);
+	PutStr("Please change to 115.2Kbps baud rate setting of the terminal.",1);
+	WaitPutCharSendEnd();
+
+	InitScif0_SCIFCLK(115200);
+}
+
+void	dgReset(void)
+{
+	*((volatile uint32_t*)WDTSET0) = 0x001FFFFF;
+	*((volatile uint32_t*)WDTCNT0) = 0x01;
 }
